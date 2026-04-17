@@ -19,24 +19,12 @@ spectrum_web/
 pip install -r requirements.txt
 ```
 
-Modifica `config.py` con gli indirizzi IP corretti dei tuoi DSA1030:
-```python
-INSTRUMENTS = {
-    "DSA1030_1": {
-        "visa_address": "TCPIP0::192.168.1.100::INSTR",
-        "label": "DSA1030 #1",
-    },
-    ...
-}
-```
 
 ## Avvio
 
 ```bash
 python main.py
 ```
-
-Apri il browser su `http://localhost:8080` (o l'IP della macchina sulla LAN).
 
 ## Architettura
 
