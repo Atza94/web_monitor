@@ -21,7 +21,7 @@ SERVPORT = x
 # ── Autenticazione operatore ──────────────────────────────
 OPERATOR_PASSWORD = "1234"
 # Chiave segreta per cifrare i cookie di sessione NiceGUI
-STORAGE_SECRET = "5bdbbe01b9a2d482e9dd963742df8ad3d756999ea104bda01b336f25599410a6"
+STORAGE_SECRET = "."
 
 # ── Parametri VISA ────────────────────────────────────────
 VISA_TIMEOUT_MS = 10_000  # timeout lettura/scrittura
