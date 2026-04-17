@@ -1,0 +1,4 @@
+nicegui>=2.0
+pyvisa>=1.14
+pyvisa-py>=0.7
+numpy>=1.24
