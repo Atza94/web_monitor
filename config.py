@@ -1,25 +1,25 @@
 """
 Configurazione strumenti e parametri di default.
-Modifica gli indirizzi VISA in base alla tua rete.
+
 """
 
 # ── Strumenti ─────────────────────────────────────────────
 #IF2 Noise Floor +20dbm
 INSTRUMENTS = {
     "DSA1030_1": {
-        "visa_address": "TCPIP0::192.168.60.69::INSTR",
+        "visa_address": "TCPIP0::192.168.60.x::INSTR",
         "label": "IF1",
     },
     "DSA1030_2": {
-        "visa_address": "TCPIP0::192.168.60.70::INSTR",
+        "visa_address": "TCPIP0::192.168.60.x::INSTR",
         "label": "IF2",
     },
 }
 # ── Autenticazione serv ───────────────────────────────────
-SERV_HOST = "192.168.51.14"
-SERVPORT = 5002
+SERV_HOST = "192.168.51.x"
+SERVPORT = x
 # ── Autenticazione operatore ──────────────────────────────
-OPERATOR_PASSWORD = "medicina"
+OPERATOR_PASSWORD = "1234"
 # Chiave segreta per cifrare i cookie di sessione NiceGUI
 STORAGE_SECRET = "5bdbbe01b9a2d482e9dd963742df8ad3d756999ea104bda01b336f25599410a6"
 
