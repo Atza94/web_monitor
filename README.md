@@ -45,3 +45,10 @@ python main.py
 - Il polling è configurabile in `config.py` (`TRACE_UPDATE_INTERVAL_S`).
 - Per sviluppo senza strumenti fisici, creare un mock di
   `InstrumentManager`.
+
+## Next steps
+
+- Definizione API per accesibilità da altre applicazioni.
+- Risoluzione bug
+- Implementazione protocollo INAF per monitoring ricevitori
+- Implementazione mappa switch analogici
