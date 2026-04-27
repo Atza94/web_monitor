@@ -1,10 +1,5 @@
 """
-Spectrum Web – Interfaccia web per due Rigol DSA1030.
-
-Avvio:
-    python main.py
-
-L'app sarà disponibile su http://localhost:8080
+Spectrum Web
 """
 
 from __future__ import annotations
@@ -45,11 +40,11 @@ logging.getLogger("uvicorn").addFilter(
     lambda record: "" not in record.getMessage()
 )
 
-# ── Manager globale (singleton) ───────────────────────────
+# Manager globale 
 mgr = InstrumentManager()
 app.on_shutdown(mgr.disconnect_all)
 
-# ── Stato globale condiviso tra tutti i client ─────────────
+# Stato globale condiviso tra tutti i client
 _latest_traces:     dict[str, TraceData | None]      = {k: None  for k in mgr.instrument_ids}
 _trace_versions:    dict[str, int]                   = {k: 0     for k in mgr.instrument_ids}
 _latest_traces2:    dict[str, TraceData | None]      = {k: None  for k in mgr.instrument_ids}
@@ -97,7 +92,7 @@ async def _background_reader(instr_id: str) -> None:
         await asyncio.sleep(TRACE_UPDATE_INTERVAL_S)
 
 
-# ── Helper di formattazione ───────────────────────────────
+#  Helper di formattazione 
 
 def fmt_freq(hz: float) -> str:
     """Formatta una frequenza in modo leggibile."""
@@ -115,7 +110,7 @@ def freq_options_map(options_hz: list[float]) -> dict[float, str]:
     return {v: fmt_freq(v) for v in options_hz}
 
 
-# ── Calcolo tempo siderale ────────────────────────────────
+# Calcolo tempo siderale
 
 def _calc_lst(utc: datetime) -> float:
     """Local Sidereal Time in hours per Medicina (IAU GMST formula)."""
@@ -132,11 +127,11 @@ def _fmt_hms(hours: float) -> str:
     return f"{h:02d}:{m:02d}:{s:02d}"
 
 
-# ── Pannello per singolo strumento ────────────────────────
+# Pannello per singolo strumento
 
 class AnalyzerPanel:
     """
-    Widget NiceGUI per un singolo analizzatore di spettro.
+    Widget NiceGUI per analizzatore di spettro.
     Gestisce connessione, grafico live, e controlli parametri.
     """
 
@@ -167,7 +162,7 @@ class AnalyzerPanel:
 
     def _build_ui(self) -> None:
         with ui.card().classes("w-full"):
-            # ── Header con stato connessione ──────────────
+            # Header con stato connessione
             with ui.row().classes("w-full items-center justify-between"):
                 ui.label(self.label).classes("text-xl font-bold")
                 with ui.row().classes("items-center gap-2"):
@@ -180,7 +175,7 @@ class AnalyzerPanel:
 
             ui.separator()
 
-            # ── Grafico spettro (Plotly) ──────────────────
+            # Grafico spettro (Plotly)
             self.chart = ui.plotly(
                 {
                     "data": [
@@ -240,12 +235,12 @@ class AnalyzerPanel:
                 ).props("dense outline size=sm").tooltip("Scarica CSV")
                 self._sweep_info_label = ui.label("").classes("text-xs text-gray-500 font-mono ml-2")
 
-            # ── Controlli parametri ───────────────────────
+            # Controlli parametri
             self.params_container = ui.column().classes("w-full")
             with self.params_container:
                 self._build_controls()
 
-            # Disabilita controlli finché non connesso
+            # Disabilita controlli finché non connesso e autenticato
             self.params_container.set_visibility(False)
 
     def _build_controls(self) -> None:
@@ -299,7 +294,7 @@ class AnalyzerPanel:
                 "color=secondary dense flat"
             )
 
-        # ── Controlli sweep ───────────────────────────────
+        # Controlli sweep 
         with ui.row().classes("w-full items-center gap-4 mt-2"):
             ui.button("Single Sweep", on_click=self._single_sweep).props(
                 "dense outline"
@@ -337,7 +332,7 @@ class AnalyzerPanel:
         """Ultima traccia disponibile dalla cache globale."""
         return _latest_traces.get(self.instr_id)
 
-    # ── Aggiornamento display (legge da cache, nessun I/O) ─
+    # Aggiornamento display (legge da cache, nessun I/O)
 
     async def _refresh_chart(self) -> None:
         needs_update = False
@@ -374,7 +369,7 @@ class AnalyzerPanel:
         if needs_update:
             self.chart.update()
 
-    # ── Connessione ───────────────────────────────────────
+    # Connessione
 
     async def _toggle_connection(self) -> None:
         if mgr.is_connected(self.instr_id):
@@ -436,12 +431,12 @@ class AnalyzerPanel:
         """Chiamato dalla pagina quando lo stato di autenticazione cambia."""
         self._update_controls_visibility()
 
-    # ── Sweep ──────────────────────────────────────────────
+    #  Single Sweep 
 
     async def _single_sweep(self) -> None:
         """Esegue una singola lettura traccia."""
         await self._update_trace()
-
+    # Continuous Sweep
     async def _toggle_continuous(self) -> None:
         """Attiva/disattiva il background reader globale per questo strumento."""
         if _continuous_active[self.instr_id]:
@@ -471,7 +466,7 @@ class AnalyzerPanel:
             self._stop_recording()
         self._rec_btn.set_enabled(False)
 
-    # ── Single sweep (aggiorna cache globale) ─────────────
+    # Single sweep (aggiorna cache globale) 
 
     async def _update_trace(self) -> None:
         """Legge TRACE1 e TRACE2 una volta e aggiorna la cache globale."""
@@ -535,7 +530,7 @@ class AnalyzerPanel:
         self._sweep_info_label.set_text("  ".join(parts))
 
     def _download_csv(self) -> None:
-        """Scarica le tracce correnti come CSV con header UTC/LST."""
+        """Scarica la traccia corrente come CSV con header UTC/LST."""
         trace = _latest_traces.get(self.instr_id)
         if trace is None:
             ui.notify("Nessuna traccia disponibile", type="warning")
@@ -563,7 +558,7 @@ class AnalyzerPanel:
         filename = f"spectrum_{self.instr_id}_{now.strftime('%Y%m%dT%H%M%SZ')}.csv"
         ui.download(buf.getvalue().encode(), filename)
 
-    # ── Registrazione stream ───────────────────────────────
+    # Registrazione stream 
 
     def _toggle_recording(self) -> None:
         if self._recording:
@@ -638,10 +633,10 @@ class AnalyzerPanel:
                 ui.notify(f"Errore scrittura: {exc}", type="negative")
             self._stop_recording(notify=False)
 
-    # ── Parametri ─────────────────────────────────────────
+    # Parametri 
 
     async def _apply_params(self) -> None:
-        """Invia i parametri dai controlli allo strumento."""
+        """Invia i parametri dal pannello allo strumento."""
         if not mgr.is_connected(self.instr_id):
             ui.notify("Strumento non connesso", type="negative")
             return
@@ -669,7 +664,7 @@ class AnalyzerPanel:
         except Exception as exc:
             ui.notify(f"Errore lettura parametri: {exc}", type="negative")
 
-    # ── Handler comando SCPI libero ────────────────────────────────
+    # Handler comando SCPI libero
     # Permette di inviare comandi SCPI arbitrari dallo stesso pannello dei parametri
     async def _send_scpi(self) -> None:
         """Invia il comando SCPI libero e mostra l'eventuale risposta."""
@@ -690,7 +685,7 @@ class AnalyzerPanel:
             self.scpi_response.text = ""
             ui.notify(f"Errore SCPI: {exc}", type="negative")
 
-# ── Antenna Panel ─────────────────────────────────────────
+# Antenna Panel 
 
 
 class AntennaPanel:
@@ -872,7 +867,7 @@ class AntennaPanel:
         }]
         self._track_chart.update()
 
-# ── Pannello di confronto polarizzazioni ──────────────────
+# Pannello di confronto polarizzazioni 
 class ComparisonPanel:
     """Overlay delle tracce di due analizzatori per confronto polarizzazioni."""
 
@@ -904,7 +899,7 @@ class ComparisonPanel:
                             "type": "scatter",
                             "mode": "lines",
                             "name": p.label,
-                            "line": {"color": colors[i], "width": 1.5},
+                            "line": {"color": colors[i], "width": 1.0},
                         }
                         for i, p in enumerate(panels)
                     ],
@@ -960,7 +955,7 @@ class ComparisonPanel:
             self.cont_btn.props("color=negative")
             self.cont_btn.text = "Stop"
 
-# ── Pagina principale ─────────────────────────────────────
+# Pagina principale 
 
 @ui.page("/")
 def index():
@@ -968,7 +963,7 @@ def index():
 
     panels: list[AnalyzerPanel] = []
 
-    # ── Dialog autenticazione ─────────────────────────────
+    # Dialog autenticazione 
     with ui.dialog() as auth_dialog, ui.card().classes("w-80"):
         ui.label("Accesso operatore").classes("text-lg font-bold")
         pwd_input = ui.input(
@@ -1006,7 +1001,7 @@ def index():
             pwd_input.value = ""
             auth_dialog.open()
 
-    # ── Header ────────────────────────────────────────────
+    # Header
     with ui.header().classes("items-center justify-between"):
         with ui.column().classes("gap-0"):
             ui.label("Spectrum Web").classes("text-2xl font-bold")
@@ -1042,7 +1037,7 @@ def index():
             ComparisonPanel(panels)
 
         AntennaPanel() 
-# ── Avvio ─────────────────────────────────────────────────
+# Avvio
 
 if __name__ in {"__main__", "__mp_main__"}:
     app.on_startup(lambda: asyncio.create_task(
