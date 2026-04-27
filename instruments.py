@@ -1,8 +1,5 @@
 """
-InstrumentManager – layer thread-safe tra PyVISA e il resto dell'app.
-
-Ogni strumento ha il proprio lock: le chiamate SCPI vengono serializzate
-per strumento, ma i due analizzatori possono essere interrogati in parallelo.
+InstrumentManager
 """
 from __future__ import annotations
 import asyncio
@@ -19,7 +16,7 @@ logger = logging.getLogger(__name__)
 reader: asyncio.StreamReader
 writer: asyncio.StreamWriter
 
-# ── Data classes per stato antenna da serv.c ──────────────
+# Data classes per stato antenna da serv.c 
 @dataclass
 class AntennaState:
     az_deg: float = 0.0
@@ -39,7 +36,7 @@ class AntennaState:
     pres: float = 0.0
     hum: float = 0.0
     wind: float = 0.0
-# ── Data classes per i risultati ──────────────────────────
+# Data classes per i risultati 
 
 @dataclass
 class TraceData:
@@ -103,7 +100,7 @@ class InstrumentManager:
     def is_connected(self, instr_id: str) -> bool:
         return self._instruments[instr_id].connected
 
-    # ── Connessione / Disconnessione ──────────────────────
+    # Connessione / Disconnessione
 
     def connect(self, instr_id: str) -> None:
         handle = self._instruments[instr_id]
@@ -139,7 +136,7 @@ class InstrumentManager:
         for instr_id in self._instruments:
             self.disconnect(instr_id)
 
-    # ── Comandi SCPI interni ──────────────────────────────
+    # Comandi SCPI interni
 
     def _write(self, handle: InstrumentHandle, cmd: str) -> None:
         """Invia un comando SCPI (lock deve essere già acquisito)."""
@@ -152,7 +149,7 @@ class InstrumentManager:
     def _query_float(self, handle: InstrumentHandle, cmd: str) -> float:
         return float(self._query(handle, cmd))
 
-    # ── Lettura parametri ─────────────────────────────────
+    # Lettura parametri 
 
     def get_params(self, instr_id: str) -> InstrumentParams:
         """Legge lo stato corrente dell'analizzatore."""
@@ -170,7 +167,7 @@ class InstrumentManager:
                 sweep_time_s=self._query_float(handle, ":SENSe:SWEep:TIME?"),
             )
 
-    # ── Impostazione parametri ────────────────────────────
+    # Impostazione parametri 
 
     def set_center_freq(self, instr_id: str, freq_hz: float) -> None:
         handle = self._instruments[instr_id]
@@ -211,13 +208,12 @@ class InstrumentManager:
                 return None
 
 
-    # ── Lettura traccia ───────────────────────────────────
+    # Lettura traccia 
 
     @staticmethod
     def _strip_block_header(raw: str) -> str:
         """
-        Rimuove l'header IEEE 488.2 definite length block (#NXXX...),
-        se presente.  Es: '#9000045014 -1.49e+01,...' → '-1.49e+01,...'
+        Rimuove l'header IEEE 488.2 definite length block (#NXXX...)
         """
         if not raw.startswith("#"):
             return raw
@@ -229,9 +225,7 @@ class InstrumentManager:
 
     def read_trace(self, instr_id: str, trace_n: int = 1) -> TraceData:
         """
-        Legge la traccia corrente dal DSA1030.
-        Il DSA1030 ritorna i dati con header IEEE 488.2 (#NXXX...)
-        seguito da valori ASCII separati da virgola.
+        Legge la traccia corrente
         """
         handle = self._instruments[instr_id]
         with handle.lock:
