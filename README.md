@@ -1,7 +1,6 @@
 # Spectrum Web
 
-Interfaccia web per il controllo e la visualizzazione live di due Rigol DSA1030
-presso la Stazione Radioastronomica di Medicina.
+Interfaccia web per il controllo e la visualizzazione di due Rigol DSA1030 e dati antenna
 
 ## Struttura
 
@@ -43,8 +42,6 @@ python main.py
 
 ## Note
 
-- Il DSA1030 ha 601 punti per traccia di default.
 - Il polling è configurabile in `config.py` (`TRACE_UPDATE_INTERVAL_S`).
-  Con 1s di intervallo il carico sulla LAN è trascurabile.
-- Per sviluppo senza strumenti fisici, puoi creare un mock di
-  `InstrumentManager` che ritorna dati casuali.
+- Per sviluppo senza strumenti fisici, creare un mock di
+  `InstrumentManager`.
