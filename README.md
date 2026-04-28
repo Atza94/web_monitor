@@ -50,5 +50,7 @@ python main.py
 
 - Definizione API per accesibilità da altre applicazioni.
 - Risoluzione bug
+- Eliminare placeholder parametri
 - Implementazione protocollo INAF per monitoring ricevitori
 - Implementazione mappa switch analogici
+  
