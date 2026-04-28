@@ -7,27 +7,27 @@ Interfaccia web per il controllo e la visualizzazione di due Rigol DSA1030 e dat
 ```
 spectrum_web/
 ├── main.py           # App NiceGUI (UI + pagina web)
-├── instruments.py    # InstrumentManager thread-safe (PyVISA)
+├── instruments.py    # InstrumentManager (PyVISA)
 ├── config.py         # Indirizzi VISA, parametri di default
 └── requirements.txt
 ```
 
 ## Setup
 
-```bash
+```
 pip install -r requirements.txt
 ```
 
 
 ## Avvio
 
-```bash
+```
 python main.py
 ```
 
 ## Architettura
 
-- **`InstrumentManager`** – Singleton che gestisce le connessioni VISA. Ogni
+- **`InstrumentManager`** – Singola istanza che gestisce le connessioni VISA. Ogni
   strumento ha il proprio `threading.Lock`, quindi le letture dei due
   analizzatori possono avvenire in parallelo, ma gli accessi allo stesso
   strumento sono serializzati.
